@@ -1,0 +1,4 @@
+matrix_size,warmup_iterations,iterations,average_ms,median_ms,gflops,correctness
+256,3,10,14.5903,14.5129,2.29977,PASS
+512,3,10,127.648,126.953,2.10293,PASS
+1024,3,10,2315.02,2279.94,0.927633,PASS

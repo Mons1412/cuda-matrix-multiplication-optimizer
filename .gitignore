@@ -1,0 +1,16 @@
+# Build outputs
+build/
+*.o
+*.out
+
+# CUDA / compiler outputs
+*.ptx
+*.cubin
+
+# Editor / temporary files
+*.swp
+*~
+.vscode/
+
+# Notebook temporary files
+.ipynb_checkpoints/
