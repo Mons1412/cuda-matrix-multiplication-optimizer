@@ -52,3 +52,13 @@ if(BUILD_TESTING)
         COMMAND test_cpu_matmul
     )
 endif()
+
+if(BUILD_TESTING)
+    add_executable(test_cpu_reference
+        tests/test_cpu_reference.cpp
+        src/cpu_matmul.cpp
+    )
+    target_compile_definitions(test_cpu_reference PRIVATE MATMUL_TESTING)
+    target_compile_options(test_cpu_reference PRIVATE -Wall -Wextra -Wpedantic)
+    add_test(NAME cpu_reference COMMAND test_cpu_reference)
+endif()
