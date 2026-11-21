@@ -50,6 +50,7 @@ bool validate(
     return true;
 }
 
+#ifndef MATMUL_TESTING
 int main()
 {
     const int N = 1024;
@@ -168,5 +169,6 @@ int main()
         std::cout << "FAIL\n";
     }
 
-    return 0;
+    return correct ? 0 : 1;
 }
+#endif // MATMUL_TESTING
