@@ -31,7 +31,7 @@ __global__ void matmul_naive(const float* A, const float* B, float* C,
     C[row * N + col] = sum;
 }
 
-bool run_case(int M, int K, int N)
+bool run_case(int M, int K, int N, bool nonbinary)
 {
     const size_t a_count = static_cast<size_t>(M) * K;
     const size_t b_count = static_cast<size_t>(K) * N;
@@ -43,11 +43,18 @@ bool run_case(int M, int K, int N)
     std::vector<float> A(a_count), B(b_count), C(c_count);
     std::vector<float> expected(c_count, 0.0f);
 
-    // Reproducible values, including negatives and zeros.
-    for (size_t i = 0; i < a_count; ++i)
-        A[i] = (static_cast<int>(i % 11) - 5) * 0.25f;
-    for (size_t i = 0; i < b_count; ++i)
-        B[i] = (static_cast<int>((i * 7) % 13) - 6) * 0.125f;
+    // Reproducible input data for both test modes.
+    for (size_t i = 0; i < a_count; ++i) {
+        A[i] = nonbinary
+            ? std::sin(static_cast<float>(i + 1) * 0.17f)
+            : (static_cast<int>(i % 11) - 5) * 0.25f;
+    }
+
+    for (size_t i = 0; i < b_count; ++i) {
+        B[i] = nonbinary
+            ? std::cos(static_cast<float>(i + 1) * 0.13f)
+            : (static_cast<int>((i * 7) % 13) - 6) * 0.125f;
+    }
 
     // Independent reference calculation using a double accumulator.
     for (int row = 0; row < M; ++row) {
@@ -94,6 +101,7 @@ bool run_case(int M, int K, int N)
     cuda_check(cudaFree(d_C), "cudaFree C");
 
     std::cout << (passed ? "[PASS] " : "[FAIL] ")
+              << (nonbinary ? "nonbinary " : "binary ")
               << M << 'x' << K << " * " << K << 'x' << N
               << " max_abs_error=" << max_abs_error << '\n';
     return passed;
@@ -109,8 +117,13 @@ int main()
     };
 
     bool all_passed = true;
-    for (const Shape& shape : cases)
-        if (!run_case(shape.M, shape.K, shape.N)) all_passed = false;
+    for (const Shape& shape : cases) {
+        if (!run_case(shape.M, shape.K, shape.N, false))
+            all_passed = false;
+
+        if (!run_case(shape.M, shape.K, shape.N, true))
+            all_passed = false;
+    }
 
     std::cout << (all_passed ? "ALL CUDA TESTS PASSED\n" : "CUDA TESTS FAILED\n");
     return all_passed ? EXIT_SUCCESS : EXIT_FAILURE;
